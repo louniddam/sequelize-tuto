@@ -2,6 +2,32 @@ const db = require('../models')
 const Tutorial = db.tutorials
 const Op = db.Sequelize.Op
 
+const getPagination = (page, size) => {
+    const limit = size ? +size : 3
+    const offset = page ? page * limit : 0
+
+    return {
+        limit,
+        offset
+    }
+}
+
+const getPagingData = (data, page, limit) => {
+    const {
+        count: totalItems,
+        rows: tutorials
+    } = data
+    const currentPage = page ? +page : 0
+    const totalPages = Math.ceil(totalItems / limit)
+
+    return {
+        totalItems,
+        tutorials,
+        totalPages,
+        currentPage
+    }
+}
+
 //Create and save a new tutorial
 exports.create = (req, res) => {
     if (!req.body.title) {
@@ -32,18 +58,32 @@ exports.create = (req, res) => {
 
 //Get all tutorials from DB
 exports.findAll = (req, res) => {
-    const title = req.query.title
+
+    const {
+        page,
+        size,
+        title
+    } = req.query
+
     var condition = title ? {
         title: {
             [Op.like]: `%${title}%`
         }
     } : null
 
-    Tutorial.findAll({
-            where: condition
+    const {
+        limit,
+        offset
+    } = getPagination(page, size)
+
+    Tutorial.findAndCountAll({
+            where: condition,
+            limit,
+            offset
         })
         .then(data => {
-            res.send(data)
+            const response = getPagingData(data, page, limit)
+            res.send(response)
         })
         .catch(err => {
             res.status(500).send({
