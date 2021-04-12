@@ -9,3 +9,9 @@ Exemples de routes :
 
 Exemples de controller: 
 ![](/githubIMG/controllerExamples.png)
+
+requête GET sans pagination:
+![](/githubIMG/postmanGetRequest.png)
+
+requête GET avec pagination:
+![](/githubIMG/getPagination.png)
